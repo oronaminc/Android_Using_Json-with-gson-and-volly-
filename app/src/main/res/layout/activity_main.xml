@@ -13,7 +13,7 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="83dp"
         android:background="@android:color/holo_orange_light">
 
         <LinearLayout
@@ -28,5 +28,10 @@
                 android:textSize="14dp" />
         </LinearLayout>
     </ScrollView>
+    <fragment
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.google.android.gms.maps.MapFragment" />
 
 </LinearLayout>
