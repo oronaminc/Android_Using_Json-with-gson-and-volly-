@@ -39,8 +39,13 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity{
 
+    //새로운 Point 배열 class를 만들어줌, 배열안에 x,y값을 갖도록
     public Point[] pointArr;
-    final String url = "https://api.myjson.com/bins/seoem";
+    //새로운 PolygonOptions 배열을 만들어줌, PolygonOptions는 원래 있던 Class임.
+    public PolygonOptions[] fieldArr;
+
+    //url 정의하기
+    final String url = "https://api.myjson.com/bins/19nnce";
     TextView textView;
     MapFragment mapFragment;
     Double pointX, pointY;
@@ -66,8 +71,8 @@ public class MainActivity extends AppCompatActivity{
                     @Override
                     public void onResponse(String response) {
                         println("$ AP_Project >>");
+                        println(response);
                         dataMining(response);
-
                         //processResponce(response);
                     }
                 },
@@ -98,9 +103,11 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
+        /*
         if(AppHelper.requestQueue == null) {
             AppHelper.requestQueue = Volley.newRequestQueue(getApplicationContext());
         }
+        */
 
         FragmentManager fragmentManager = getFragmentManager();
         mapFragment = (MapFragment)fragmentManager.findFragmentById(R.id.map);
@@ -118,43 +125,47 @@ public class MainActivity extends AppCompatActivity{
         Gson gson = new Gson();
         FieldResult field = gson.fromJson(response, FieldResult.class);
 
-        int pointNum = field.fieldResult.fieldArea.size();
-        String fieldName = field.fieldResult.fieldName;
+        // 도형이 몇개 있는 지
+        int fieldNum = field.fieldResult.size();
 
-        pointArr = new Point[pointNum];
+        fieldArr = new PolygonOptions[fieldNum];
 
-        for(int i = 0; i<pointNum; i++) {
-            pointName = field.fieldResult.fieldArea.get(i).pointName;
-            pointX = Double.parseDouble(field.fieldResult.fieldArea.get(i).pointX);
-            pointY = Double.parseDouble(field.fieldResult.fieldArea.get(i).pointY);
-            println(pointName + " : " + "("+ pointX+" , " + pointY+")");
+        for (int j = 0; j< fieldNum; j++){
+            //도형안에 점이 몇개 있는 지
+            String fieldName = field.fieldResult.get(j).fieldName;
+            int pointNum = field.fieldResult.get(j).numbersOfPoint;
 
-            LatLng pointValue = new LatLng(pointX,pointY);
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(pointValue);
-            markerOptions.title(fieldName);
-            markerOptions.snippet(pointName);
-            map.addMarker(markerOptions);
+            pointArr =new Point[pointNum];
+            for(int i = 0; i<pointNum; i++) {
+                pointName = field.fieldResult.get(j).fieldArea.get(i).pointName;
+                pointX = Double.parseDouble(field.fieldResult.get(j).fieldArea.get(i).pointX);
+                pointY = Double.parseDouble(field.fieldResult.get(j).fieldArea.get(i).pointY);
+                println(pointName + " : " + "("+ pointX+" , " + pointY+")");
 
-            //polygon 좌표 세팅하기
-            Point point = new Point();
-            point.x = pointX;
-            point.y = pointY;
-            pointArr[i] = point; //i는 for문에서 쓰는 int 변수
+                LatLng pointValue = new LatLng(pointX,pointY);
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(pointValue);
+                markerOptions.title(fieldName);
+                markerOptions.snippet(pointName);
+                map.addMarker(markerOptions);
+
+                //polygon 좌표 세팅하기
+                Point point = new Point();
+                point.x = pointX;
+                point.y = pointY;
+                pointArr[i] = point; //i는 for문에서 쓰는 int 변수
+            }
+
+            PolygonOptions rectOptions = new PolygonOptions()
+                    .strokeColor(Color.RED)
+                    .strokeWidth(5);
+            for(int i=0; i<pointNum; i++){
+                rectOptions.add(new LatLng(pointArr[i].x, pointArr[i].y));
+            }
+            rectOptions.add(new LatLng(pointArr[0].x, pointArr[0].y));
+            map.addPolygon(rectOptions);
+            fieldArr[j] = rectOptions;
         }
-
-
-        //Polygon Setup
-        PolygonOptions rectOptions = new PolygonOptions()
-                .strokeColor(Color.RED)
-                .strokeWidth(5);
-
-        for(int i=0; i<pointNum; i++){
-            rectOptions.add(new LatLng(pointArr[i].x, pointArr[i].y));
-        }
-        rectOptions.add(new LatLng(pointArr[0].x, pointArr[0].y));
-
-        Polygon polygon = map.addPolygon(rectOptions);
 
         println("@@@@@@@@@@@@@요청 끝남@@@@@@@@@@@@@"+"\n");
         map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(pointX,pointY)));
@@ -169,65 +180,5 @@ public class MainActivity extends AppCompatActivity{
         public double x;
         public double y;
     }
-
-    /*
-    @Override
-    public void onMapReady(final GoogleMap map) {
-        Toast.makeText(getApplicationContext(),"onMapReady()먼저", Toast.LENGTH_SHORT).show();
-
-    }
-    */
-
-    /*
-
-        LatLng SEOUL = new LatLng(37.494462, 127.070654);
-
-
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(SEOUL);
-        markerOptions.title("서울");
-        markerOptions.snippet("한국의 수도");
-        map.addMarker(markerOptions);
-
-        map.moveCamera(CameraUpdateFactory.newLatLng(SEOUL));
-        map.animateCamera(CameraUpdateFactory.zoomTo(20));
-    */
-
-
-
-    /*
-    public void processResponce(String response){
-        Gson gson = new Gson();
-        FieldResult field = gson.fromJson(response, FieldResult.class);
-        final int pointX = Integer.parseInt(field.fieldResult.fieldArea.get(1).pointX);
-        final int pointY = Integer.parseInt(field.fieldResult.fieldArea.get(1).pointY);
-        if(field != null){
-            int pointSize = field.fieldResult.fieldArea.size();
-            //int countMovie = movieList.boxOfficeResult.dailyBoxOfficeList.size();
-            //println("응답받은 영화 갯수 : " + countMovie);
-            //println("박스오피스 타입 : " + movieList.boxOfficeResult.boxofficeType);
-            for(int i = 0; i<pointSize; i++){
-                println(field.fieldResult.fieldArea.get(i).pointName);
-            }
-        }
-    }
-    */
-
-
-    /*다른 예제 입니다.
-    //FieldArea, FieldResult, Point class는 다
-    public void processResponce(String response){
-        Gson gson = new Gson();
-        FieldResult fieldResult = gson.fromJson(response, FieldResult.class);
-
-        if(fieldResult != null){
-            int countPoint = fieldResult.fieldResult.fieldArea.size();
-            println("응답 받은 점의 갯수 :" + countPoint);
-            println("필지 제목 : " + fieldResult.fieldResult.fieldName);
-
-        }
-    }
-    */
-
 
 }

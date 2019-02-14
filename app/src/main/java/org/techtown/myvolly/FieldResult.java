@@ -1,7 +1,11 @@
 package org.techtown.myvolly;
 
+import java.util.ArrayList;
+
 public class FieldResult {
 
-    FieldArea fieldResult;
+    ArrayList<FieldArea> fieldResult = new ArrayList<FieldArea>();
+
+
 
 }

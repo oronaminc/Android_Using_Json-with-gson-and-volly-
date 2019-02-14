@@ -4,8 +4,9 @@ import java.util.ArrayList;
 
 public class FieldArea {
 
-    String fieldName;
-
     ArrayList<Point> fieldArea = new ArrayList<Point>();
 
+    String fieldName;
+    String fieldLocation;
+    int numbersOfPoint;
 }
